@@ -15,7 +15,7 @@ class ChatController extends Controller
      */
     private const INTENT_CONFIG = [
         'greeting' => [
-            'keywords' => ['hello', 'hi', 'hey', 'greetings', 'sup', 'yo', 'welcome'],
+            'keywords' => ['helloo', 'hii', 'heey', 'greetings', 'sup', 'you', 'welcome'],
             'threshold' => 1,
             'response' => "**Hello!** 👋 I am your AI Recruiter.\n\nTry asking:\n- *\"High paying Laravel jobs\"*\n- *\"Remote React roles\"*",
         ],
