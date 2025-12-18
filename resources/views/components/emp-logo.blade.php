@@ -1,7 +1,7 @@
 @props(['logo', 'w' => 99])
 
 <img 
-    src="{{ $logo }}"
+    src="{{ asset('storage/' . $job->logo) }}"
     class="rounded-xl object-cover"
     style="width: {{ $w }}px; height: {{ $w }}px;"
     width="{{ $w }}" 
