@@ -10,7 +10,31 @@ use App\Models\Job;
 
 class ChatController extends Controller
 {
-
+    /**
+     * Define the intents, patterns, and responses in one place.
+     */
+    private const INTENT_CONFIG = [
+        'greeting' => [
+            'keywords' => ['hello', 'hi', 'hey', 'greetings', 'sup', 'yo', 'welcome'],
+            'threshold' => 1,
+            'response' => "**Hello!** 👋 I am your AI Recruiter.\n\nTry asking:\n- *\"High paying Laravel jobs\"*\n- *\"Remote React roles\"*",
+        ],
+        'gratitude' => [
+            'keywords' => ['thanks', 'thank', 'thx', 'cool', 'awesome', 'great', 'ok'],
+            'threshold' => 1,
+            'response' => "You're very welcome! 🚀 Let me know if you need anything else.",
+        ],
+        'identity' => [
+            'keywords' => ['who', 'bot', 'human', 'ai', 'real', 'name', 'developer'],
+            'threshold' => 1,
+            'response' => "I am **Pixel AI**, a smart recruiting agent built with **Laravel 11** and **Groq**.",
+        ],
+        'help' => [
+            'keywords' => ['help', 'support', 'guide', 'stuck', 'error', 'broken'],
+            'threshold' => 2,
+            'response' => "Here is what I can do:\n🔹 Salary Search\n🔹 Tech Stack Search\n🔹 Freshness Filter",
+        ]
+    ];
 
     public function __invoke(Request $request, VectorService $vectorService)
     {
@@ -25,9 +49,13 @@ class ChatController extends Controller
         $model = "llama-3.1-8b-instant"; 
 
         // --- LAYER 0: LOCAL FILTER ---
-        if ($localReply = $this->checkLocalIntent($question)) {
-            $duration = round(microtime(true) - $startTime, 2);
-            return response()->json(['answer' => $localReply, 'duration' => $duration ]);
+        // We check if we have a match. If yes, we return immediately.
+        if ($localMatch = $this->checkLocalIntent($question)) {
+            return response()->json([
+                'answer'   => $localMatch['answer'],
+                'actions'  => $localMatch['actions'], // We now support buttons!
+                'duration' => round(microtime(true) - $startTime, 2)
+            ]);
         }
 
         // --- STEP 1: ASK THE AI ROUTER ---
@@ -53,9 +81,6 @@ INSTRUCTIONS:
 - If user mentions a specific technology or title (e.g. "Laravel", "Manager", "Vue"), put it in "search_term".
 - If no specific tech is mentioned, set "search_term": null.
 - Extract "limit" if user asks for a number ("top 3"). Default 5.
-
-Example 1: "High paying Laravel jobs" -> {"tool": "sql_salary", "sort": "desc", "limit": 5, "search_term": "Laravel"}
-Example 2: "Newest React roles" -> {"tool": "sql_recent", "limit": 5, "search_term": "React"}
 EOT;
 
         try {
@@ -85,7 +110,7 @@ EOT;
 
         } catch (\Exception $e) {
             $tool = 'vector_search';
-            $limit = 5;
+            $limit = 15;
             $searchTerm = null;
         }
 
@@ -96,11 +121,9 @@ EOT;
         if ($tool === 'sql_salary') {
             $direction = ($decision['sort'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
             
-            // Start Query
             $query = Job::with(['employer', 'tags'])
                 ->orderByRaw('CAST(REPLACE(REPLACE(salary, " EGP", ""), ",", "") AS UNSIGNED) ' . $direction);
 
-            // Apply Keyword Filter if exists
             if ($searchTerm) {
                 $query->where('title', 'like', "%{$searchTerm}%");
             }
@@ -115,10 +138,8 @@ EOT;
 
         } elseif ($tool === 'sql_recent') {
             
-            // Start Query
             $query = Job::with(['employer', 'tags'])->latest();
 
-            // Apply Keyword Filter if exists
             if ($searchTerm) {
                 $query->where('title', 'like', "%{$searchTerm}%");
             }
@@ -133,7 +154,6 @@ EOT;
 
         } else {
             // VECTOR SEARCH
-            // Note: Vector search naturally handles the keyword via similarity, so we don't need a WHERE clause here usually.
             $matches = $vectorService->search($question);
             $jobIds = array_column($matches, 'id');
 
@@ -185,72 +205,41 @@ EOT;
         ]);
     }
 
-
-
-/**
-     * Define the intents, patterns, and responses in one place.
-     * 'threshold' = max number of typos allowed (0 = exact match only).
-     */
-    private const INTENT_CONFIG = [
-        'greeting' => [
-            'keywords' => ['hello', 'hi', 'hey', 'greetings', 'sup', 'yo', 'welcome'],
-            'threshold' => 1, // Allows "helo" or "hlo" automatically
-            'response' => "**Hello!** 👋 I am your AI Recruiter.\n\nTry asking:\n- *\"High paying Laravel jobs\"*\n- *\"Remote React roles\"*",
-            'actions'  => ['Find Laravel Jobs', 'Salary Check'] // Buttons for frontend
-        ],
-        'gratitude' => [
-            'keywords' => ['thanks', 'thank', 'thx', 'cool', 'awesome', 'great', 'ok'],
-            'threshold' => 1,
-            'response' => "You're very welcome! 🚀 Let me know if you need anything else.",
-            'actions'  => []
-        ],
-        'identity' => [
-            'keywords' => ['who', 'bot', 'human', 'ai', 'real', 'name', 'developer'],
-            'threshold' => 1,
-            'response' => "I am **Pixel AI**, a smart recruiting agent built with **Laravel 11** and **Groq**.",
-            'actions'  => ['Who made you?', 'How do you work?']
-        ],
-        'help' => [
-            'keywords' => ['help', 'support', 'guide', 'stuck', 'error', 'broken'],
-            'threshold' => 2, // Allows "heeeelp" or "suport"
-            'response' => "Here is what I can do:\n🔹 Salary Search\n🔹 Tech Stack Search\n🔹 Freshness Filter",
-            'actions'  => ['Show Examples', 'Restart']
-        ]
-    ];
-
+    // --------------------------------------------------------
+    // FIXED LOCAL INTENT FUNCTION (No $startTime issues)
+    // --------------------------------------------------------
     /**
-     * @return array{message: string, duration: float, actions: array}|null
+     * @return array{answer: string, actions: array}|null
      */
     private function checkLocalIntent(string $question): ?array
     {
-        // 1. Tokenize: Split sentence into individual words for analysis
-        // "Hello, I need help" -> ['hello', 'i', 'need', 'help']
         $clean = strtolower(trim($question));
         $clean = preg_replace('/[^a-z0-9\s]/', '', $clean);
         $userWords = explode(' ', $clean);
 
-        // 2. Loop through our Configuration (Dynamic Matching)
         foreach (self::INTENT_CONFIG as $intent => $config) {
-            
-            // Check every word the user typed
             foreach ($userWords as $userWord) {
                 
-                // Skip very short words (to avoid matching "i" or "a")
                 if (strlen($userWord) < 2) continue;
 
                 foreach ($config['keywords'] as $keyword) {
                     
-                    // A. Exact Match (Fastest)
+                    // A. Exact Match
                     if ($userWord === $keyword) {
-                        return $this->formatResponse($config);
+                        return [
+                            'answer' => $config['response'],
+                            'actions' => $config['actions'] ?? []
+                        ];
                     }
 
-                    // B. Fuzzy Match (Levenshtein) - Catches typos automatically
-                    // "helo" vs "hello" = 1 difference. If threshold is 1, it matches.
+                    // B. Fuzzy Match
                     if ($config['threshold'] > 0) {
                         $distance = levenshtein($userWord, $keyword);
                         if ($distance <= $config['threshold']) {
-                            return $this->formatResponse($config);
+                            return [
+                                'answer' => $config['response'],
+                                'actions' => $config['actions'] ?? []
+                            ];
                         }
                     }
                 }
@@ -259,13 +248,4 @@ EOT;
 
         return null;
     }
-
-    private function formatResponse(array $config): array
-    {
-        return [
-            'answer'  => $config['response'],
-            'duration' => round(microtime(true) - $startTime, 2)
-        ];
-    }
-
 }
