@@ -1,5 +1,3 @@
-<?php die('Instant response');
-?>
 
 <!doctype html>
 <html lang="en">
