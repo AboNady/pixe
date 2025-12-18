@@ -4,7 +4,7 @@
         {{-- Header --}}
         <h1 class="text-3xl font-medium text-center text-white mb-10">Log In</h1>
 
-        <x-forms.form method="POST" action="{{ route('login') }}">
+        <x-forms.form method="POST" action="{{ route('loginp') }}">
 
             <x-forms.input label="Email" name="email" type="email" required autocomplete="username" />
 
