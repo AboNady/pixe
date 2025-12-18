@@ -32,10 +32,15 @@ class JobController extends Controller
                     ->latest()
                     ->simplePaginate(10); 
         
+        $totalJobsCount = Cache::remember('total_jobs_count', 3600, function () {
+        return Job::count();
+         });
+        
                 return view('main.index', [
                     'jobs' => $jobs,
                     'featuredJobs' => $featuredJobs,
-                    'tags' => Cache::remember('tags_list', 3600, fn() => Tag::all())
+                    'tags' => Cache::remember('tags_list', 3600, fn() => Tag::all()),
+                    'totalJobsCount' => $totalJobsCount
                 ]);
     }
     public function create()
