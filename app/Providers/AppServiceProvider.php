@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Model::unguard();
-        //Job::observe(JobObserver::class);
+        Job::observe(JobObserver::class);
 
     }
 }
