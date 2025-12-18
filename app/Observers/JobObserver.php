@@ -1,32 +1,29 @@
-// pixe/app/Observers/JobObserver.php
+<?php
 
 namespace App\Observers;
 
 use App\Models\Job;
 use App\Services\VectorService;
-use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit; 
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class JobObserver implements ShouldHandleEventsAfterCommit
 {
-    // REMOVE THE CONSTRUCTOR:
-    // protected $vectorService;
-    // public function __construct(VectorService $vectorService) { ... }
-
     /**
      * Handle the Job "created" event.
      */
-    public function created(Job $job, VectorService $vectorService): void // <-- Inject here
+    public function created(Job $job): void
     {
-        // New job in SQL? -> Send it to Pinecone immediately.
-        $vectorService->upsertJob($job);
+        // ✅ Correct way: Resolve the service Lazily using app()
+        // This prevents the "2-second delay" on the homepage.
+        app(VectorService::class)->upsertJob($job);
     }
 
     /**
      * Handle the Job "updated" event.
      */
-    public function updated(Job $job, VectorService $vectorService): void // <-- Inject here
+    public function updated(Job $job): void
     {
-        // Changed salary or description? -> Update Pinecone.
-        $vectorService->upsertJob($job);
+        // ✅ Correct way: Resolve the service Lazily using app()
+        app(VectorService::class)->upsertJob($job);
     }
 }
