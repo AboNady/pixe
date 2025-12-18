@@ -48,7 +48,7 @@
                         {{-- Logo --}}
                         <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-900/50 border border-slate-700/40
                                     flex items-center justify-center overflow-hidden shadow-inner">
-                            <x-emp-logo :logo="$job->logo" size="36" />
+                            <x-emp-logo :logo="$job->logo" w="36" />
                         </div>
 
                         {{-- Employer & Status --}}
