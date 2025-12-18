@@ -88,7 +88,8 @@ class JobController extends Controller
 
         // PERFORMANCE FIX 4: Queue the email
         Mail::to($user->email)->queue(new PostCreated($user, $job));
-
+        // In store() and update()
+        Cache::forget('featured_jobs'); // Force the homepage to refresh next time
         return redirect()
             ->route('index')
             ->with('success', 'Job posted successfully!');
@@ -164,7 +165,7 @@ public function update(Request $request, Job $job)
         if (isset($validated['tags'])) {
             $job->tags()->sync($validated['tags']);
         }
-
+        Cache::forget('featured_jobs'); // Force the homepage to refresh next time
         // 5. Return Response
         return redirect()
             ->route('jobs.manage')
@@ -176,7 +177,7 @@ public function update(Request $request, Job $job)
         $this->authorize('delete', $job);
         
         $job->delete();
-
+        Cache::forget('featured_jobs'); // Force the homepage to refresh next time
         return redirect()
                ->route('jobs.manage')
                ->with('success', 'Job deleted successfully.');
