@@ -34,55 +34,7 @@
                  transition-all duration-300 hover:shadow-xl {{ $selected['hover'] }} {{ $selected['hoverBorder'] }}">
 
     <div class="flex flex-col lg:flex-row gap-8">
-<!-- 
-        {{-- LEFT COLUMN --}}
-        <div class="flex-shrink-0 flex flex-col gap-4 w-full lg:w-72">
-            <a href="{{ route("job.show",$job) }}">
 
-            {{-- Logo --}}
-            <div class="w-20 h-20 rounded-xl border border-slate-700/40 bg-slate-900/40 shadow-inner overflow-hidden flex items-center justify-center">
-                <x-emp-logo :logo="$job->logo" size="72" />
-            </div>
-
-            {{-- Employer --}}
-            <div>
-                <h3 class="text-xl font-thin {{ $selected['accent'] }} leading-tight truncate mt-4">
-                    {{ $job->employer->name }}
-                </h3>
-
-                {{-- Job Type + Location --}}
-                <p class="text-sm text-slate-400 mt-1">
-                    {{ $job->type }} • {{ $job->location }}
-                </p>
-            </div>
-
-            {{-- Featured/Urgent --}}
-            <div class="flex gap-2 flex-wrap mt-6">
-                @if($job->is_featured)
-                <span class="px-2 py-1 text-[10px] font-thin uppercase rounded-md
-                             bg-amber-600/10 text-amber-400 border border-amber-500/20">
-                    ⭐ Featured
-                </span>
-                @endif
-
-                @if($isUrgent)
-                <span class="px-2 py-1 text-[10px] font-thin uppercase rounded-md
-                             bg-rose-600/10 text-rose-400 border border-rose-500/20">
-                    Urgent
-                </span>
-                @endif
-            </div>
-            </a>
-            {{-- Tags --}}
-            @if($job->tags->count())
-            <div class="flex flex-wrap gap-2 mt-2">
-                @foreach ($job->tags as $tag)
-                    <x-tag :tag="$tag" size="base" />
-                @endforeach
-            </div>
-            @endif
-
-        </div> -->
         {{-- LEFT COLUMN --}}
         <div class="flex-shrink-0 flex flex-col w-full lg:w-72 gap-6">
             
