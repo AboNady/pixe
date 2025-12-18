@@ -71,7 +71,7 @@ Route::middleware('guest')->group(function () {
 
     // Login
     Route::get('login', [SessionController::class, 'create'])->name('login');
-    Route::post('login', [SessionController::class, 'store'])->name('login');
+    Route::post('login', [SessionController::class, 'store'])->name('loginp');
 });
 
 // ============================================================================
