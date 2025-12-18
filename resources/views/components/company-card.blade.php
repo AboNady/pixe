@@ -14,16 +14,10 @@
     {{-- Logo & Name Header --}}
     <div class="flex items-start gap-4 mb-5">
         {{-- Logo Container --}}
-        @php
-            $logoPath = $company->logo && file_exists(public_path('storage/'.$company->logo))
-                        ? asset('storage/'.$company->logo)
-                        : 'https://picsum.photos/seed/' . rand(0,100000) . '/100/100';
-        @endphp
-
         <div class="flex-shrink-0 w-14 h-14 bg-slate-800/50 rounded-lg border border-slate-700/50 
                     flex items-center justify-center group-hover:border-blue-500/30 group-hover:bg-slate-800 transition-all overflow-hidden">
             @if($company->logo)
-                <img src="{{ $logoPath }}" 
+                <img src="{{ asset('storage/'.$company->logo) }}" 
                      alt="{{ $logoPath }}"
                      class="w-full h-full object-cover">
             @else
