@@ -25,6 +25,9 @@ use App\Services\VectorService;
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
 // ============================================================================
+Route::get('/test-speed', function() {
+    return 'Fast?';
+});
 
 Route::post('/boring', ChatController::class)->name('chat.ask');
 
