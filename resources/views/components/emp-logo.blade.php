@@ -3,8 +3,7 @@
 @php
   $logoPath = $logo && file_exists(public_path('storage/'.$logo))
               ? asset('storage/'.$logo)
-              : 'hthgfh0';
-              //: 'https://picsum.photos/seed/' . rand(0,100000) . '/100/100';
+              : 'https://picsum.photos/seed/' . rand(0,100000) . '/100/100';
 
 @endphp
 
