@@ -9,7 +9,7 @@
         </div>
 
         {{-- Registration Form --}}
-        <x-forms.form method="POST" action="{{ route('register') }}" enctype="multipart/form-data"
+        <x-forms.form method="POST" action="{{ route('registerp') }}" enctype="multipart/form-data"
                        class="space-y-8 bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-sm p-8 rounded-2xl border border-slate-700/50 shadow-xl">
 
             {{-- Personal Information Section --}}
