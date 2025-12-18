@@ -18,7 +18,7 @@
                     flex items-center justify-center group-hover:border-blue-500/30 group-hover:bg-slate-800 transition-all overflow-hidden">
             @if($company->logo)
                 <img src="{{ asset('storage/'.$company->logo) }}" 
-                     alt="{{ $logoPath }}"
+                     alt="logo"
                      class="w-full h-full object-cover">
             @else
                 <div class="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
