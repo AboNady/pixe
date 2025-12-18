@@ -19,22 +19,24 @@ class JobController extends Controller
     public function index()
     {
         // 1. Get Featured Jobs separately (Not paginated)
-        $featuredJobs = Job::with(['employer', 'tags'])
-            ->where('is_featured', true)
-            ->latest()
-            ->take(8) // Limit to 6 so it doesn't get huge
-            ->get();
+        $featuredJobs = Cache::remember('featured_jobs', 3600, function () {
+                    return Job::with(['employer', 'tags'])
+                        ->where('is_featured', true)
+                        ->latest()
+                        ->take(8)
+                        ->get();
+                });
 
         // 2. Get All Jobs (Paginated)
         $jobs = Job::with(['employer', 'tags'])
-            ->latest()
-            ->paginate(10); 
-
-        return view('main.index', [
-            'jobs' => $jobs,
-            'featuredJobs' => $featuredJobs,
-            'tags' => Cache::remember('tags_list', 3600, fn() => Tag::all())
-        ]);
+                    ->latest()
+                    ->simplePaginate(10); 
+        
+                return view('main.index', [
+                    'jobs' => $jobs,
+                    'featuredJobs' => $featuredJobs,
+                    'tags' => Cache::remember('tags_list', 3600, fn() => Tag::all())
+                ]);
     }
     public function create()
     {
