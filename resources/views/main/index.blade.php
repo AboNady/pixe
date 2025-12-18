@@ -53,7 +53,7 @@
                 <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-4">
                     <div class="text-center">
                         {{-- FIX 1: Combine both counts for the Total --}}
-                        <p class="text-2xl font-bold text-blue-400">{{ $jobs->total()}}</p>
+                        <p class="text-2xl font-bold text-blue-400">{{$totalJobsCount}}</p>
                         <p class="text-sm text-slate-400">Active Jobs</p>
                     </div>
                     <div class="text-center">
