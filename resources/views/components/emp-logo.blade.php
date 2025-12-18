@@ -1,11 +1,10 @@
 @props(['logo', 'w' => 99])
 
 @php
-  $logoPath = $logo && file_exists(public_path('storage/'.$logo))
-              ? asset('storage/'.$logo)
-               null
-              //: 'https://picsum.photos/seed/' . rand(0,100000) . '/100/100';
-
+    // We removed 'file_exists' because scanning the disk is slow.
+    $logoPath = !empty($logo) 
+        ? asset('storage/'.$logo) 
+        : asset('images/default-company-logo.png'); // Replace with your actual default image
 @endphp
 
 <img 
